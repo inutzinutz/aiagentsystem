@@ -30,3 +30,4 @@ vercel
 - Modern dark theme UI
 - Responsive design
 - Built with Next.js 14, React, Tailwind CSS
+- Deployed on Vercel
