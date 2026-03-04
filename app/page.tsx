@@ -1,109 +1,74 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState } from 'react'
+import ChatPage from './components/ChatPage'
+import Dashboard from './components/Dashboard'
+import TaskManager from './components/TaskManager'
+import Monitor from './components/Monitor'
+import MultiAgent from './components/MultiAgent'
 
-interface Message {
-  role: 'user' | 'assistant'
-  content: string
-}
+const navItems = [
+  { id: 'dashboard', label: 'Dashboard', icon: '📊' },
+  { id: 'chat', label: 'AI Agent', icon: '🤖' },
+  { id: 'tasks', label: 'Task Manager', icon: '📋' },
+  { id: 'monitor', label: 'Monitor', icon: '📡' },
+  { id: 'agents', label: 'Multi-Agent', icon: '🧠' },
+]
 
 export default function Home() {
-  const [messages, setMessages] = useState<Message[]>([
-    { role: 'assistant', content: 'สวัสดีครับ! ผม OpenClaw AI Agent powered by Gemini ยินดีให้ความช่วยเหลือครับ' }
-  ])
-  const [input, setInput] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
-  const messagesEndRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!input.trim() || isLoading) return
-
-    const userMessage = input.trim()
-    setInput('')
-    const newMessages: Message[] = [...messages, { role: 'user', content: userMessage }]
-    setMessages(newMessages)
-    setIsLoading(true)
-    setMessages(prev => [...prev, { role: 'assistant', content: '...' }])
-
-    try {
-      const res = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: newMessages }),
-      })
-      const data = await res.json()
-      setMessages(prev => {
-        const updated = [...prev]
-        updated[updated.length - 1] = {
-          role: 'assistant',
-          content: data.content || data.error || 'เกิดข้อผิดพลาด',
-        }
-        return updated
-      })
-    } catch {
-      setMessages(prev => {
-        const updated = [...prev]
-        updated[updated.length - 1] = { role: 'assistant', content: 'เกิดข้อผิดพลาด กรุณาลองใหม่' }
-        return updated
-      })
-    } finally {
-      setIsLoading(false)
-    }
-  }
+  const [active, setActive] = useState('dashboard')
+  const [sidebarOpen, setSidebarOpen] = useState(true)
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900">
-      <header className="p-4 border-b border-gray-700/50">
-        <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-          <span className="text-3xl">🦞</span>
-          OpenClaw AI Agent
-          <span className="text-xs bg-purple-600 px-2 py-1 rounded-full ml-2">Gemini</span>
-        </h1>
-      </header>
+    <div className="min-h-screen bg-gray-950 flex">
+      {/* Sidebar */}
+      <aside className={`${sidebarOpen ? 'w-56' : 'w-16'} transition-all duration-300 bg-gray-900 border-r border-gray-800 flex flex-col`}>
+        <div className="p-4 border-b border-gray-800 flex items-center gap-2">
+          <span className="text-2xl">🦞</span>
+          {sidebarOpen && <span className="text-white font-bold text-lg">OpenClaw</span>}
+        </div>
+        <nav className="flex-1 p-2 space-y-1">
+          {navItems.map(item => (
+            <button
+              key={item.id}
+              onClick={() => setActive(item.id)}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                active === item.id
+                  ? 'bg-purple-600 text-white'
+                  : 'text-gray-400 hover:bg-gray-800 hover:text-white'
+              }`}
+            >
+              <span className="text-lg">{item.icon}</span>
+              {sidebarOpen && item.label}
+            </button>
+          ))}
+        </nav>
+        <button
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          className="p-4 text-gray-500 hover:text-white border-t border-gray-800 text-sm"
+        >
+          {sidebarOpen ? '◀ ซ่อน' : '▶'}
+        </button>
+      </aside>
 
-      <main className="max-w-4xl mx-auto p-4">
-        <div className="bg-gray-800/50 rounded-xl border border-gray-700/50 h-[600px] flex flex-col">
-          <div className="flex-1 overflow-y-auto p-4 space-y-4">
-            {messages.map((msg, i) => (
-              <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-[70%] p-3 rounded-lg whitespace-pre-wrap ${
-                  msg.role === 'user'
-                    ? 'bg-purple-600 text-white'
-                    : 'bg-gray-700 text-gray-100'
-                }`}>
-                  {msg.content === '...' ? (
-                    <span className="animate-pulse">กำลังคิด...</span>
-                  ) : msg.content}
-                </div>
-              </div>
-            ))}
-            <div ref={messagesEndRef} />
+      {/* Main Content */}
+      <main className="flex-1 overflow-auto">
+        <header className="bg-gray-900 border-b border-gray-800 px-6 py-3 flex items-center justify-between">
+          <h1 className="text-white font-semibold">
+            {navItems.find(n => n.id === active)?.icon} {navItems.find(n => n.id === active)?.label}
+          </h1>
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+            <span className="text-green-400 text-sm">Mission Control Online</span>
           </div>
+        </header>
 
-          <form onSubmit={handleSubmit} className="p-4 border-t border-gray-700/50">
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder="พิมพ์ข้อความ..."
-                disabled={isLoading}
-                className="flex-1 bg-gray-700/50 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:opacity-50"
-              />
-              <button
-                type="submit"
-                disabled={isLoading || !input.trim()}
-                className="bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 text-white px-6 py-3 rounded-lg font-medium transition-colors"
-              >
-                ส่ง
-              </button>
-            </div>
-          </form>
+        <div className="p-6">
+          {active === 'dashboard' && <Dashboard />}
+          {active === 'chat' && <ChatPage />}
+          {active === 'tasks' && <TaskManager />}
+          {active === 'monitor' && <Monitor />}
+          {active === 'agents' && <MultiAgent />}
         </div>
       </main>
     </div>
