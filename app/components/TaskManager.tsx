@@ -1,6 +1,11 @@
 'use client'
 
 import { useState } from 'react'
+import type { Notification } from '../page'
+
+interface Props {
+  addNotification: (n: Omit<Notification, 'id' | 'read'>) => void
+}
 
 type Priority = 'high' | 'medium' | 'low'
 type Status = 'pending' | 'running' | 'done' | 'failed'
@@ -42,7 +47,7 @@ const statusIcon: Record<Status, string> = {
   failed: '❌',
 }
 
-export default function TaskManager() {
+export default function TaskManager({ addNotification }: Props) {
   const [tasks, setTasks] = useState<Task[]>(initialTasks)
   const [newTask, setNewTask] = useState('')
   const [agent, setAgent] = useState('Sales Agent')
@@ -60,6 +65,7 @@ export default function TaskManager() {
     }
     setTasks(prev => [task, ...prev])
     setNewTask('')
+    addNotification({ title: 'Task Added', message: `เพิ่ม task: ${newTask}`, type: 'info', time: 'เพิ่งเกิดขึ้น' })
   }
 
   const deleteTask = (id: number) => setTasks(prev => prev.filter(t => t.id !== id))
