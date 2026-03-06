@@ -6,6 +6,7 @@ import Dashboard from './components/Dashboard'
 import TaskManager from './components/TaskManager'
 import Monitor from './components/Monitor'
 import MultiAgent from './components/MultiAgent'
+import OracleMemory from './components/OracleMemory'
 
 const navItems = [
   { id: 'dashboard', label: 'Dashboard', icon: '📊' },
@@ -13,6 +14,7 @@ const navItems = [
   { id: 'tasks', label: 'Task Manager', icon: '📋' },
   { id: 'monitor', label: 'Monitor', icon: '📡' },
   { id: 'agents', label: 'Multi-Agent', icon: '🧠' },
+  { id: 'oracle', label: 'Oracle Memory', icon: '🔮' },
 ]
 
 export default function Home() {
@@ -69,6 +71,7 @@ export default function Home() {
           {active === 'tasks' && <TaskManager />}
           {active === 'monitor' && <Monitor />}
           {active === 'agents' && <MultiAgent />}
+          {active === 'oracle' && <OracleMemory />}
         </div>
       </main>
     </div>
